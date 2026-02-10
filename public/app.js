@@ -196,17 +196,30 @@ function renderProjectionTables(data) {
 function renderPlayerRow(player, gameInfo) {
   const isFinal = gameInfo.statusName === 'STATUS_FINAL';
 
+  // Per-stat confidence map for PTS/REB/AST
+  const statConfidence = {
+    points: player.ptsConfidence || player.confidence,
+    rebounds: player.rebConfidence || player.confidence,
+    assists: player.astConfidence || player.confidence,
+  };
+
   const statCells = STAT_COLS.map(col => {
     const actual = player.stats[col.key] || 0;
     const proj = player.projected[col.key] || 0;
     const projRounded = Math.round(proj);
     const same = projRounded === actual || isFinal;
 
+    // Show per-stat confidence dot for PTS/REB/AST
+    const conf = statConfidence[col.key];
+    const confDot = conf !== undefined && !isFinal
+      ? `<span class="stat-conf-dot ${conf >= 70 ? 'dot-high' : conf >= 40 ? 'dot-mid' : 'dot-low'}" title="${col.label} confidence: ${conf}%"></span>`
+      : '';
+
     return `
       <td>
         <div class="stat-cell">
           <span class="stat-actual">${actual}</span>
-          ${!same ? `<span class="stat-projected">${projRounded}</span>` : ''}
+          ${!same ? `<span class="stat-projected">${confDot}${projRounded}</span>` : ''}
         </div>
       </td>
     `;
@@ -219,6 +232,12 @@ function renderPlayerRow(player, gameInfo) {
   const minProj = Math.round(player.projectedMinutes);
   const minSame = minActual === minProj || isFinal;
 
+  // Context flags display
+  const flags = player.contextFlags || [];
+  const flagsHtml = flags.length > 0
+    ? `<div class="player-flags">${flags.map(f => `<span class="flag-badge">${formatFlag(f)}</span>`).join('')}</div>`
+    : '';
+
   return `
     <tr>
       <td>
@@ -226,7 +245,7 @@ function renderPlayerRow(player, gameInfo) {
           ${player.headshot ? `<img class="player-headshot" src="${player.headshot}" alt="" onerror="this.style.display='none'">` : ''}
           <div class="player-info">
             <div class="player-name">${player.shortName || player.name}</div>
-            <div class="player-meta">${player.position}${player.jersey ? ' #' + player.jersey : ''}</div>
+            <div class="player-meta">${player.position}${player.jersey ? ' #' + player.jersey : ''}${flagsHtml}</div>
           </div>
         </div>
       </td>
@@ -242,6 +261,15 @@ function renderPlayerRow(player, gameInfo) {
       </td>
     </tr>
   `;
+}
+
+function formatFlag(flag) {
+  const map = {
+    'blowout': 'BLOWOUT',
+    'large_lead': 'LEAD',
+    'foul_trouble': 'FOULS',
+  };
+  return map[flag] || flag;
 }
 
 function renderDNPRow(player) {

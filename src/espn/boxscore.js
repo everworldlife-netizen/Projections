@@ -26,46 +26,86 @@ async function getBoxscore(gameId) {
     }
   }
 
-  // Extract game-level info
+  // Extract game-level info with score breakdown per team
   const header = raw.header?.competitions?.[0];
   const statusObj = header?.status || {};
-  const gameInfo = {
-    period: statusObj.period || 0,
-    clock: statusObj.displayClock || '0:00',
-    totalScore: 0,
-    statusName: statusObj.type?.name || '',
-  };
+
+  let homeScore = 0;
+  let awayScore = 0;
+  let homeAbbrev = '';
+  let awayAbbrev = '';
 
   for (const comp of (header?.competitors || [])) {
-    gameInfo.totalScore += parseInt(comp.score, 10) || 0;
-  }
-
-  // Extract season averages from the game leaders if available
-  const seasonAverages = extractSeasonAverages(raw);
-
-  return { players, gameInfo, seasonAverages };
-}
-
-function extractSeasonAverages(raw) {
-  const averages = {};
-
-  // ESPN summary includes season stats for players in the "statistics" section
-  const playerStats = raw.boxscore?.players || [];
-  for (const teamGroup of playerStats) {
-    for (const statGroup of teamGroup.statistics || []) {
-      for (const athlete of statGroup.athletes || []) {
-        const id = athlete.athlete?.id;
-        if (!id) continue;
-        // The athlete object sometimes includes season averages
-        // We'll use the current game stats as a baseline and enhance with web data
-        averages[id] = {
-          name: athlete.athlete?.displayName || '',
-        };
-      }
+    const score = parseInt(comp.score, 10) || 0;
+    if (comp.homeAway === 'home') {
+      homeScore = score;
+      homeAbbrev = comp.team?.abbreviation || '';
+    } else {
+      awayScore = score;
+      awayAbbrev = comp.team?.abbreviation || '';
     }
   }
 
-  return averages;
+  const gameInfo = {
+    period: statusObj.period || 0,
+    clock: statusObj.displayClock || '0:00',
+    totalScore: homeScore + awayScore,
+    homeScore,
+    awayScore,
+    homeAbbrev,
+    awayAbbrev,
+    scoreDiff: homeScore - awayScore,
+    statusName: statusObj.type?.name || '',
+  };
+
+  // Extract team-level stats from boxscore teams section
+  const teamStats = extractTeamStats(raw);
+
+  return { players, gameInfo, teamStats };
+}
+
+/**
+ * Extract team-level aggregate stats from ESPN's boxscore.teams array.
+ * This gives us official team totals for FGA, REB, AST etc.
+ */
+function extractTeamStats(raw) {
+  const teams = {};
+  const boxTeams = raw.boxscore?.teams || [];
+
+  for (const teamGroup of boxTeams) {
+    const abbrev = teamGroup.team?.abbreviation || '';
+    if (!abbrev) continue;
+
+    const stats = {};
+    for (const statItem of teamGroup.statistics || []) {
+      stats[statItem.name] = statItem.displayValue || statItem.value;
+    }
+
+    teams[abbrev] = {
+      abbrev,
+      name: teamGroup.team?.displayName || abbrev,
+      fieldGoalsMade: parseFloat(stats.fieldGoalsMade) || 0,
+      fieldGoalsAttempted: parseFloat(stats.fieldGoalsAttempted) || 0,
+      fieldGoalPct: parseFloat(stats.fieldGoalPct) || 0,
+      threePointMade: parseFloat(stats.threePointFieldGoalsMade) || 0,
+      threePointAttempted: parseFloat(stats.threePointFieldGoalsAttempted) || 0,
+      threePointPct: parseFloat(stats.threePointFieldGoalPct) || 0,
+      freeThrowsMade: parseFloat(stats.freeThrowsMade) || 0,
+      freeThrowsAttempted: parseFloat(stats.freeThrowsAttempted) || 0,
+      freeThrowPct: parseFloat(stats.freeThrowPct) || 0,
+      totalRebounds: parseFloat(stats.totalRebounds) || 0,
+      offensiveRebounds: parseFloat(stats.offensiveRebounds) || 0,
+      defensiveRebounds: parseFloat(stats.defensiveRebounds) || 0,
+      assists: parseFloat(stats.assists) || 0,
+      steals: parseFloat(stats.steals) || 0,
+      blocks: parseFloat(stats.blocks) || 0,
+      turnovers: parseFloat(stats.turnovers || stats.totalTurnovers) || 0,
+      fouls: parseFloat(stats.fouls || stats.totalFouls) || 0,
+      points: parseFloat(stats.points) || 0,
+    };
+  }
+
+  return teams;
 }
 
 function normalizePlayer(athlete, labels, teamId, teamAbbrev, teamName, teamLogo) {

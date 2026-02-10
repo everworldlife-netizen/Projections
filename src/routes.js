@@ -25,7 +25,7 @@ router.get('/games/:gameId/projections', async (req, res) => {
   const gameId = req.params.gameId;
 
   try {
-    const { players, gameInfo } = await getBoxscore(gameId);
+    const { players, gameInfo, teamStats } = await getBoxscore(gameId);
 
     // Fetch season averages from the internet for projection accuracy
     const playerIds = players.filter(p => !p.didNotPlay && p.id).map(p => p.id);

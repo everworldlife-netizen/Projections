@@ -583,6 +583,38 @@ header {
   font-size: 12px;
 }
 
+/* Per-stat confidence dots */
+.stat-conf-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.dot-high { background: var(--green); }
+.dot-mid { background: var(--yellow); }
+.dot-low { background: var(--red); }
+
+/* Context flag badges */
+.player-flags {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: 4px;
+}
+
+.flag-badge {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: var(--red-dim);
+  color: var(--red);
+}
+
 /* Loading spinner */
 .spinner {
   display: inline-block;
