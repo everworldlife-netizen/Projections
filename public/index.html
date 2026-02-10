@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Live Projections</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <h1>NBA Live Projections</h1>
+      <span class="subtitle">Real-time player stat projections</span>
+    </div>
+    <div class="header-right">
+      <div id="url-drop-zone" class="url-drop-zone">
+        <input type="text" id="url-input" placeholder="Drop or paste any ESPN/NBA URL here..." />
+        <button id="url-submit" class="btn-parse">Parse</button>
+      </div>
+      <div class="status-bar">
+        <span id="last-updated">--</span>
+        <span id="auto-refresh-indicator" class="indicator active" title="Auto-refreshing"></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- URL Parse Results -->
+    <section id="url-results" class="url-results hidden">
+      <div class="url-results-header">
+        <h3 id="url-results-title">Parsed Data</h3>
+        <button id="url-results-close" class="btn-close">&times;</button>
+      </div>
+      <div id="url-results-content"></div>
+    </section>
+
+    <!-- Game selector strip -->
+    <section id="game-selector" class="game-strip">
+      <div class="loading-msg">Loading today's games...</div>
+    </section>
+
+    <!-- Projection tables -->
+    <section id="projection-view" class="hidden">
+      <div id="game-header" class="game-header-detail"></div>
+      <div class="team-tables" id="team-tables"></div>
+    </section>
+
+    <!-- Empty state -->
+    <section id="empty-state" class="empty-state">
+      <div class="empty-icon">&#127936;</div>
+      <p>Select a game above to view live player projections</p>
+      <p class="empty-hint">Or paste an ESPN/NBA.com URL to load specific game data</p>
+    </section>
+
+    <!-- No games state -->
+    <section id="no-games-state" class="empty-state hidden">
+      <div class="empty-icon">&#128164;</div>
+      <p>No NBA games scheduled for today</p>
+      <p class="empty-hint">Check back on a game day or paste a URL to a specific game</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
