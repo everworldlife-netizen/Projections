@@ -1,0 +1,34 @@
+services:
+  # Gateway mode: long-running service connected to Telegram/Discord
+  assistant-gateway:
+    build: .
+    container_name: ai-assistant-gateway
+    restart: unless-stopped
+    profiles:
+      - gateway
+    command: ["gateway", "--config", "/app/config/config.json"]
+    volumes:
+      - ./config/config.json:/app/config/config.json:ro
+      - assistant-workspace:/app/workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Uncomment to expose webhook port if needed:
+    # ports:
+    #   - "18791:18791"
+
+  # Agent mode: interactive CLI (one-shot or conversational)
+  assistant-agent:
+    build: .
+    container_name: ai-assistant-agent
+    profiles:
+      - agent
+    command: ["agent", "--config", "/app/config/config.json"]
+    volumes:
+      - ./config/config.json:/app/config/config.json:ro
+      - assistant-workspace:/app/workspace
+    stdin_open: true
+    tty: true
+
+volumes:
+  assistant-workspace:
+    name: assistant-workspace

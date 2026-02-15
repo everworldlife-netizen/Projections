@@ -1,0 +1,9 @@
+__pycache__
+*.pyc
+.git
+.env
+config/config.json
+workspace/
+*.egg-info
+.mypy_cache
+.pytest_cache

@@ -1,0 +1,75 @@
+{
+  "agents": {
+    "defaults": {
+      "workspace": "/app/workspace",
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "max_tokens": 8192,
+      "temperature": 0.7,
+      "max_tool_iterations": 20,
+      "system_prompt": ""
+    }
+  },
+
+  "providers": {
+    "openai": {
+      "api_key": "YOUR_OPENAI_API_KEY",
+      "api_base": "https://api.openai.com/v1",
+      "model": ""
+    },
+    "anthropic": {
+      "api_key": "YOUR_ANTHROPIC_API_KEY",
+      "api_base": "",
+      "model": "claude-sonnet-4-20250514"
+    },
+    "openrouter": {
+      "api_key": "YOUR_OPENROUTER_API_KEY",
+      "api_base": "https://openrouter.ai/api/v1",
+      "model": ""
+    },
+    "groq": {
+      "api_key": "YOUR_GROQ_API_KEY",
+      "api_base": "https://api.groq.com/openai/v1",
+      "model": "llama-3.3-70b-versatile"
+    },
+    "deepseek": {
+      "api_key": "YOUR_DEEPSEEK_API_KEY",
+      "api_base": "https://api.deepseek.com/v1",
+      "model": "deepseek-chat"
+    }
+  },
+
+  "channels": {
+    "telegram": {
+      "enabled": false,
+      "token": "YOUR_TELEGRAM_BOT_TOKEN",
+      "allowFrom": ["YOUR_TELEGRAM_USER_ID"]
+    },
+    "discord": {
+      "enabled": false,
+      "token": "YOUR_DISCORD_BOT_TOKEN",
+      "allowFrom": ["YOUR_DISCORD_USER_ID"]
+    }
+  },
+
+  "tools": {
+    "web_search": {
+      "engine": "duckduckgo",
+      "api_key": ""
+    },
+    "shell": {
+      "enabled": false,
+      "allowed_commands": ["date", "uptime", "df", "free", "uname"]
+    }
+  },
+
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 18791
+  },
+
+  "scheduler": {
+    "heartbeat_interval_minutes": 30,
+    "enabled": true
+  }
+}
