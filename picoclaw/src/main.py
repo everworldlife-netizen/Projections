@@ -1,7 +1,8 @@
 """Main entry point for the assistant.
 
-Supports two modes:
+Supports three modes:
   - gateway: Long-running service connecting to chat platforms (Telegram, Discord)
+  - web:     Web command center with real-time chat UI
   - agent:   Interactive CLI for one-shot or conversational use
 """
 
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 async def run_gateway(config_path: str = None):
-    """Run in gateway mode: connect to configured chat platforms."""
+    """Run in gateway mode: connect to configured chat platforms + web UI."""
     config = load_config(config_path)
     agent = Agent(config)
     channels = []
@@ -51,20 +52,31 @@ async def run_gateway(config_path: str = None):
             allow_from=config.channels.discord.allow_from,
         )
         channels.append(dc)
-        # Discord.start() is blocking, run it as a task
         asyncio.create_task(dc.start())
 
-    if not channels:
-        logger.error(
-            "No channels configured! Enable at least one channel "
-            "(telegram or discord) in config.json"
-        )
-        return
+    # Start web UI
+    import uvicorn
+    from .web.server import create_app
+
+    app = create_app(agent, config)
+    web_config = uvicorn.Config(
+        app,
+        host=config.gateway.host,
+        port=config.gateway.port,
+        log_level="info",
+    )
+    server = uvicorn.Server(web_config)
+    web_task = asyncio.create_task(server.serve())
+
+    logger.info(
+        "Gateway running: %d bot channel(s) + web UI on http://%s:%d",
+        len(channels),
+        config.gateway.host,
+        config.gateway.port,
+    )
 
     # Start scheduler
     scheduler.start()
-
-    logger.info("Gateway is running with %d channel(s). Press Ctrl+C to stop.", len(channels))
 
     # Wait for shutdown signal
     stop_event = asyncio.Event()
@@ -81,10 +93,35 @@ async def run_gateway(config_path: str = None):
     # Cleanup
     logger.info("Shutting down...")
     scheduler.stop()
+    server.should_exit = True
+    await web_task
     for ch in channels:
         await ch.stop()
     await agent.close()
     logger.info("Goodbye!")
+
+
+def run_web(config_path: str = None):
+    """Run web command center only (no bot channels)."""
+    import uvicorn
+    from .web.server import create_app
+
+    config = load_config(config_path)
+    agent = Agent(config)
+    app = create_app(agent, config)
+
+    logger.info(
+        "Web Command Center starting on http://%s:%d",
+        config.gateway.host,
+        config.gateway.port,
+    )
+
+    uvicorn.run(
+        app,
+        host=config.gateway.host,
+        port=config.gateway.port,
+        log_level="info",
+    )
 
 
 async def run_agent_cli(config_path: str = None):
@@ -129,9 +166,9 @@ def main():
     parser.add_argument(
         "mode",
         nargs="?",
-        default="agent",
-        choices=["gateway", "agent"],
-        help="Run mode: 'gateway' for chat platform service, 'agent' for CLI (default: agent)",
+        default="web",
+        choices=["gateway", "web", "agent"],
+        help="Run mode: 'gateway' for full service, 'web' for web UI only, 'agent' for CLI (default: web)",
     )
     parser.add_argument(
         "--config",
@@ -143,6 +180,8 @@ def main():
 
     if args.mode == "gateway":
         asyncio.run(run_gateway(args.config))
+    elif args.mode == "web":
+        run_web(args.config)
     else:
         asyncio.run(run_agent_cli(args.config))
 

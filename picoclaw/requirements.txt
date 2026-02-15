@@ -6,3 +6,6 @@ httpx==0.*
 apscheduler==3.*
 pydantic==2.*
 pydantic-settings==2.*
+fastapi==0.*
+uvicorn[standard]==0.*
+websockets==14.*

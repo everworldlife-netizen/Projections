@@ -14,8 +14,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application code and static assets
 COPY src/ src/
+COPY public/ public/
 
 # Create default workspace directory
 RUN mkdir -p /app/workspace/memory /app/workspace/sessions \
@@ -23,6 +24,9 @@ RUN mkdir -p /app/workspace/memory /app/workspace/sessions \
 
 # Default config location
 ENV CONFIG_PATH=/app/config/config.json
+
+# Web UI port
+EXPOSE 18791
 
 ENTRYPOINT ["python", "-m", "src.main"]
 CMD ["gateway", "--config", "/app/config/config.json"]
