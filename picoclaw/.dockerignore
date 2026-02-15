@@ -3,7 +3,11 @@ __pycache__
 .git
 .env
 config/config.json
-workspace/
+workspace/memory/
+workspace/sessions/
+workspace/skills/
+workspace/state/
+workspace/cron/
 *.egg-info
 .mypy_cache
 .pytest_cache

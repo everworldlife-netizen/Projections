@@ -148,6 +148,11 @@ def load_config(path: str = None) -> Config:
             config = Config()
             return _merge_env_overrides(config)
 
+    if not os.path.exists(path):
+        logger.warning("Config file %s not found, using defaults + env vars", path)
+        config = Config()
+        return _merge_env_overrides(config)
+
     logger.info("Loading config from %s", path)
     with open(path) as f:
         raw = json.load(f)

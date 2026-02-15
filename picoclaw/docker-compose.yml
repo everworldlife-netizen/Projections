@@ -6,12 +6,13 @@ services:
     restart: unless-stopped
     profiles:
       - gateway
-    command: ["gateway", "--config", "/app/config/config.json"]
+    command: ["gateway"]
     volumes:
-      - ./config/config.json:/app/config/config.json:ro
       - assistant-workspace:/app/workspace
     ports:
-      - "18791:18791"
+      - "${GATEWAY_PORT:-18791}:18791"
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
 
@@ -22,12 +23,13 @@ services:
     restart: unless-stopped
     profiles:
       - web
-    command: ["web", "--config", "/app/config/config.json"]
+    command: ["web"]
     volumes:
-      - ./config/config.json:/app/config/config.json:ro
       - assistant-workspace:/app/workspace
     ports:
-      - "18791:18791"
+      - "${GATEWAY_PORT:-18791}:18791"
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
 
@@ -37,10 +39,11 @@ services:
     container_name: ai-assistant-agent
     profiles:
       - agent
-    command: ["agent", "--config", "/app/config/config.json"]
+    command: ["agent"]
     volumes:
-      - ./config/config.json:/app/config/config.json:ro
       - assistant-workspace:/app/workspace
+    env_file:
+      - .env
     stdin_open: true
     tty: true
 

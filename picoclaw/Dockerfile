@@ -1,10 +1,8 @@
 FROM python:3.12-slim
 
-# Minimal metadata
 LABEL maintainer="self-hosted"
-LABEL description="Personal AI Assistant - clean-room implementation"
+LABEL description="Midasbot - Personal AI Assistant"
 
-# Don't buffer Python output
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -18,15 +16,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ src/
 COPY public/ public/
 
-# Create default workspace directory
+# Create workspace directories and copy seed files
 RUN mkdir -p /app/workspace/memory /app/workspace/sessions \
     /app/workspace/skills /app/workspace/state /app/workspace/cron
-
-# Default config location
-ENV CONFIG_PATH=/app/config/config.json
+COPY workspace/IDENTITY.md workspace/SOUL.md workspace/HEARTBEAT.md /app/workspace/
 
 # Web UI port
 EXPOSE 18791
 
 ENTRYPOINT ["python", "-m", "src.main"]
-CMD ["gateway", "--config", "/app/config/config.json"]
+CMD ["web"]
