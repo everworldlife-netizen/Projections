@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PicoClaw Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar"></aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Header -->
+      <header id="header" class="top-header"></header>
+
+      <!-- Game Strip -->
+      <div id="game-strip" class="game-strip-container"></div>
+
+      <!-- Primary Content View -->
+      <main id="view-container" class="view-container">
+        <div class="loading-screen">
+          <div class="loader"></div>
+          <p>Loading PicoClaw Dashboard...</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Module Scripts -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

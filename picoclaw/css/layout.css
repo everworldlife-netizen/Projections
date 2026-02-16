@@ -1,0 +1,200 @@
+/* ============================================================================
+   PicoClaw Layout System
+   ============================================================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--pc-font);
+  font-size: var(--pc-text-base);
+  color: var(--pc-text-primary);
+  background: var(--pc-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* App Shell: sidebar + main area */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--pc-sidebar-width);
+  min-width: var(--pc-sidebar-width);
+  height: 100vh;
+  background: var(--pc-sidebar-bg);
+  border-right: 1px solid var(--pc-border);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--pc-transition-slow), min-width var(--pc-transition-slow);
+  z-index: var(--pc-z-sidebar);
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: var(--pc-sidebar-collapsed);
+  min-width: var(--pc-sidebar-collapsed);
+}
+
+/* Main wrapper */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Top header */
+.top-header {
+  height: var(--pc-header-height);
+  min-height: var(--pc-header-height);
+  background: var(--pc-bg-surface);
+  border-bottom: 1px solid var(--pc-border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--pc-space-xl);
+  z-index: var(--pc-z-header);
+}
+
+/* Game strip */
+.game-strip-container {
+  min-height: var(--pc-strip-height);
+  background: var(--pc-bg-surface);
+  border-bottom: 1px solid var(--pc-border);
+  overflow: hidden;
+}
+
+/* View container */
+.view-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--pc-space-xl);
+  scrollbar-width: thin;
+  scrollbar-color: var(--pc-border-strong) transparent;
+}
+
+.view-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.view-container::-webkit-scrollbar-thumb {
+  background: var(--pc-border-strong);
+  border-radius: 3px;
+}
+
+.view-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Loading screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--pc-space-lg);
+  color: var(--pc-text-secondary);
+}
+
+.loader {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--pc-border-strong);
+  border-top-color: var(--pc-accent);
+  border-radius: 50%;
+  animation: pc-spin 0.7s linear infinite;
+}
+
+@keyframes pc-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Grid utilities */
+.pc-grid {
+  display: grid;
+  gap: var(--pc-space-lg);
+}
+
+.pc-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.pc-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.pc-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.pc-flex {
+  display: flex;
+  align-items: center;
+}
+
+.pc-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.pc-gap-xs { gap: var(--pc-space-xs); }
+.pc-gap-sm { gap: var(--pc-space-sm); }
+.pc-gap-md { gap: var(--pc-space-md); }
+.pc-gap-lg { gap: var(--pc-space-lg); }
+.pc-gap-xl { gap: var(--pc-space-xl); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: var(--pc-sidebar-collapsed);
+    min-width: var(--pc-sidebar-collapsed);
+  }
+
+  .sidebar .nav-label,
+  .sidebar .sidebar-title,
+  .sidebar .sidebar-section-title {
+    display: none;
+  }
+
+  .pc-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .pc-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -220px;
+    transition: left var(--pc-transition-slow);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .view-container {
+    padding: var(--pc-space-lg);
+  }
+
+  .pc-grid-2,
+  .pc-grid-3,
+  .pc-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Utility: hidden */
+.pc-hidden { display: none !important; }
+
+/* Utility: scrollbar for inner panels */
+.pc-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pc-border-strong) transparent;
+}
