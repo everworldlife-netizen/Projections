@@ -1,0 +1,41 @@
+name: mound-live
+services:
+  app:
+    build:
+      context: https://github.com/everworldlife-netizen/Projections.git#mound-live-hostinger
+      dockerfile: mound-live-deploy/Dockerfile
+    image: mound-live:2026-09-19
+    container_name: mound-live-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8866:8000"
+    environment:
+      DATA_DIR: /app/data
+      APP_USER: akara
+      APP_PASSWORD: ${APP_PASSWORD}
+      POLL_SECONDS: "5"
+      COLLECT: "1"
+      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY:-}
+      ODDS_API_KEY: ${ODDS_API_KEY:-}
+    volumes:
+      - mound_live_data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 160
+    mem_limit: 1536m
+    cpus: 1.5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      traefik.enable: "false"
+
+volumes:
+  mound_live_data:
