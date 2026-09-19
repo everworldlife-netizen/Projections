@@ -1,0 +1,21 @@
+name: Mound Hostinger Build Check
+
+on:
+  push:
+    branches:
+      - mound-live-hostinger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deployment branch
+        uses: actions/checkout@v4
+      - name: Build exact Hostinger image
+        run: docker build -f mound-live-deploy/Dockerfile -t mound-live:test .
+      - name: Inspect image
+        run: docker image inspect mound-live:test --format '{{json .Config.Healthcheck}}'
