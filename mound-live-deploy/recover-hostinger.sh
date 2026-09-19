@@ -180,7 +180,7 @@ unset MOUND_PASSWORD
 
 echo
 echo "--- MLB connectivity from INSIDE Mound container ---"
-docker exec mound-live-app python - <<'PY'
+docker exec -i mound-live-app python - <<'PY'
 import json, urllib.request, time
 u='https://statsapi.mlb.com/api/v1/schedule?sportId=1'
 t=time.monotonic()
