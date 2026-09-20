@@ -25,5 +25,7 @@ Probed ESPN Site API on 2026-09-20.
 
 - **Works for FanDuel boards:** `nba`, `wnba`, `nbl`, `mens-college-basketball`.
 - **Euroleague slug exists** but is often empty; use `api-live.euroleague.net` instead.
-- **Does not exist on ESPN (HTTP 400):** German BBL, LKL, LNBP, FIBA Champions League. Use API-Basketball with `API_BASKETBALL_KEY`.
+- **Does not exist on ESPN (HTTP 400):** German BBL, LKL, LNBP, FIBA Champions League.
+- **FanDuel live scoreboard (no key):** `sbapi.{il|nj}.sportsbook.fanduel.com/api/in-play` lists live basketball events; `api.sportsbook.fanduel.com/ips/inplayservice/v1.0/livedata` supplies score, period, and remaining clock. Verified 2026-09-20 with live German BBL (Oldenburg v MBC) and LKL (Neptunas v Zalgiris). eBasketball / GG League / H2H GG / ACE / JUDGEMENT sims are dropped. **Odds are not read.**
+- Optional **API-Basketball** (`API_BASKETBALL_KEY`) still supplies box stats for those leagues.
 - ESPN `fiba` is **World Cup**, not Basketball Champions League.

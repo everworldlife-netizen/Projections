@@ -191,6 +191,16 @@ const LEAGUES = {
     euroCode: null,
     apiBasketball: null,
   },
+  other: {
+    id: 'other',
+    name: 'International',
+    abbrev: 'INTL',
+    fanduelPriority: false,
+    clock: FIBA_40,
+    espnSlug: null,
+    euroCode: null,
+    apiBasketball: null,
+  },
 };
 
 const DEFAULT_SCOREBOARD = ['nba', 'wnba', 'nbl', 'euroleague', 'eurocup', 'bbl', 'lkl', 'bcl', 'lnbp', 'ncaam'];

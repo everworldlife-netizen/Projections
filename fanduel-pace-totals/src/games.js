@@ -3,6 +3,7 @@ const espnBoard = require('./espn/scoreboard');
 const espnBox = require('./espn/boxscore');
 const euro = require('./feeds/euroleague');
 const apib = require('./feeds/apiBasketball');
+const fdLive = require('./feeds/fanduelLive');
 const { buildSnapshot } = require('./model/totals');
 const { evaluate } = require('./model/advice');
 const { isVirtualGame } = require('./model/virtual');
@@ -38,7 +39,39 @@ function parseId(id) {
   if (source === 'espn') return { source, leagueId: parts[1], eventId: parts.slice(2).join(':') };
   if (source === 'euro') return { source, leagueId: parts[1], seasonCode: parts[2], gameCode: parts[3] };
   if (source === 'apib') return { source, leagueId: parts[1], gameId: parts[2] };
+  if (source === 'fd') return { source, leagueId: parts[1], eventId: parts.slice(2).join(':') };
   throw new Error(`Unknown game id ${id}`);
+}
+
+function normName(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/\b(bc|bk|kk|fc|the)\b/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function matchupKey(g) {
+  const names = [normName(g.home?.name), normName(g.away?.name)].filter(Boolean).sort();
+  return names.length === 2 ? names.join('|') : '';
+}
+
+function isLiveStatus(g) {
+  return g.status === 'in_progress' || g.status === 'halftime';
+}
+
+function mergePreferFanDuelLive(existing, fdGames) {
+  const fd = (fdGames || []).filter(Boolean);
+  const liveFd = fd.filter(isLiveStatus);
+  const keys = new Set(liveFd.map(matchupKey).filter(Boolean));
+  const rest = (existing || []).filter((g) => {
+    if (g.source === 'fanduel') return false;
+    const k = matchupKey(g);
+    if (k && keys.has(k)) return false;
+    return true;
+  });
+  return sortGames([...liveFd, ...rest]);
 }
 
 async function listGames() {
@@ -55,8 +88,9 @@ async function listGames() {
   const apibP = apib.enabled()
     ? Promise.all(apibIds.map((id) => apib.listLeagueGames(id)))
     : Promise.resolve(apibIds.map((id) => ({ games: [], skipped: true, leagueId: id })));
+  const fdP = fdLive.listLiveGames();
 
-  const [espnRes, euroLists, apibLists] = await Promise.all([espnP, euroP, apibP]);
+  const [espnRes, euroLists, apibLists, fdRes] = await Promise.all([espnP, euroP, apibP, fdP]);
 
   let games = [...espnRes.games];
   for (const list of euroLists) games.push(...list);
@@ -80,12 +114,19 @@ async function listGames() {
     return true;
   });
 
+  games = mergePreferFanDuelLive(games, fdRes.games || []);
+
   return {
-    games: sortGames(games),
+    games,
     errors: espnRes.errors || [],
     apiBasketball: {
       enabled: apib.enabled(),
       skipped: apibMeta,
+    },
+    fanduelLive: {
+      ok: Boolean(fdRes.ok),
+      liveCount: (fdRes.games || []).length,
+      error: fdRes.error || null,
     },
   };
 }
@@ -119,6 +160,12 @@ async function getGame(id) {
     }
     const stats = await apib.getGameStatistics(parsed.leagueId, parsed.gameId);
     game.box = stats;
+  } else if (parsed.source === 'fd') {
+    game = await fdLive.getLiveGame(parsed.leagueId, parsed.eventId);
+    if (!game) {
+      const err = new Error('FanDuel live event is no longer on the board');
+      throw err;
+    }
   } else {
     throw new Error('Unknown source');
   }
@@ -147,7 +194,16 @@ function coverage() {
     apiBasketball: l.apiBasketball
       ? { names: l.apiBasketball.names, needsKey: !l.espnSlug && !l.euroCode }
       : null,
+    fanduelLive: true,
   }));
 }
 
-module.exports = { listGames, getGame, evaluateGame, coverage, parseId };
+module.exports = {
+  listGames,
+  getGame,
+  evaluateGame,
+  coverage,
+  parseId,
+  mergePreferFanDuelLive,
+  matchupKey,
+};

@@ -13,7 +13,7 @@ http://localhost:3000 — player PTS/REB/AST projections from ESPN box scores.
 
 ## FanDuel pace totals companion (this branch)
 
-Live **game / quarter / half / team totals** from possessions and shot volume. Paste FanDuel lines. Does not scrape FanDuel or place bets.
+Live **game / quarter / half / team totals** from possessions and shot volume. Paste FanDuel **lines** (never scraped). Live scores/clock for in-play FanDuel basketball (BBL, LKL, …) come from FanDuel’s public sportsbook JSON. Does not place bets.
 
 ```bash
 cd fanduel-pace-totals
