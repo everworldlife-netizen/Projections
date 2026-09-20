@@ -150,6 +150,7 @@ function mapLiveBasketball(inPlay, liveData) {
     const live = liveMap.get(Number(event.eventId));
     if (live && live.modelType && String(live.modelType).toLowerCase() !== 'basketball') continue;
     const details = live?.basketballDetails || null;
+    if (!details) continue;
     const comp = competitions[event.competitionId] || competitions[String(event.competitionId)] || {};
     const leagueName = comp.name || 'Basketball';
     const leagueId = competitionToLeagueId(leagueName);

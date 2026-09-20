@@ -201,6 +201,19 @@ describe('FanDuel live mapper', () => {
     assert.equal(ids.includes('333'), false);
     assert.ok(ids.includes('36086255'));
   });
+
+  it('skips in-play events that have no basketball scoreboard payload', () => {
+    const extra = JSON.parse(JSON.stringify(IN_PLAY));
+    extra.attachments.events['36089999'] = {
+      eventId: 36089999,
+      name: 'Ulm Baskets v Riesen Ludwigsburg',
+      eventTypeId: 7522,
+      competitionId: 9989214,
+      openDate: '2026-09-20T15:00:00.000Z',
+    };
+    const games = mapLiveBasketball(extra, LIVE_DATA);
+    assert.equal(games.some((g) => g.sourceId === '36089999'), false);
+  });
 });
 
 describe('FanDuel live merge', () => {
