@@ -10,16 +10,39 @@ Target boards FanDuel carries internationally: **NBA, WNBA, Australian NBL, Euro
 cd fanduel-pace-totals
 npm install
 npm test
+npm run build    # syntax check + unit tests (also used as the Docker build step)
 npm run dev
 ```
 
 Open http://localhost:3000
 
-- `npm start` — same app without `--watch`
-- `npm run build` — syntax check + unit tests
+- `npm start` — production process (`node server.js`, listens on `0.0.0.0:${PORT:-3000}`)
+- `npm run build` — `node --check` on `server.js` + `src/routes.js`, then `npm test`
 - `npm run probe` — re-hit ESPN slugs and refresh `docs/feeds.md`
 
 From the Projections repo root you can also `npm run dev:totals` / `npm run test:totals` (existing `npm run dev` is still the NBA player-projection dashboard).
+
+## Docker (Hostinger VPS)
+
+Ubuntu 24.04 + Docker. From this folder on the VM (alongside your other compose projects):
+
+```bash
+cd fanduel-pace-totals
+docker compose up -d --build
+```
+
+Then open `http://<VPS-IP>:3000`. Optional BBL/LKL/BCL/LNBP:
+
+```bash
+export API_BASKETBALL_KEY=your_key
+docker compose up -d --build
+```
+
+Or put the key in a `.env` next to `docker-compose.yml` (`API_BASKETBALL_KEY=...`). Do not commit `.env`.
+
+Image: multi-stage Node 22 Alpine. Builder runs `npm ci` + `npm run build`. Runtime runs `node server.js` as user `node` on port 3000, `restart: unless-stopped`. Traefik labels are commented in `docker-compose.yml` — uncomment and set `Host(...)` when you put it behind the existing proxy.
+
+Stop: `docker compose down`
 
 ## How to use
 

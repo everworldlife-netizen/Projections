@@ -34,7 +34,7 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Pace Totals (FanDuel companion) http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Pace Totals (FanDuel companion) http://0.0.0.0:${PORT}`);
   console.log('Not betting advice. Paste FanDuel lines — nothing is scraped.');
 });
