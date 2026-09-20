@@ -20,7 +20,7 @@ function currentSeasonYear(now = new Date()) {
 function windowFilter(utcDate, now = Date.now()) {
   const t = Date.parse(utcDate);
   if (!Number.isFinite(t)) return false;
-  const ahead = 36 * 3600 * 1000;
+  const ahead = 14 * 24 * 3600 * 1000;
   const behind = 14 * 3600 * 1000;
   return t >= now - behind && t <= now + ahead;
 }

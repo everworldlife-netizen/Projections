@@ -53,9 +53,16 @@ function buildSnapshot(game, league) {
   const period = Number(game.period) || 0;
   const clock = game.clock || '0:00';
   const isHalftime = game.status === 'halftime' || game.isHalftime;
-  const elapsed = elapsedGameMinutes(period, clock, league, { isHalftime });
-  const remaining = remainingScheduledMinutes(period, clock, league, { isHalftime });
-  const remainPeriod = remainingInPeriodMinutes(period, clock, league, { isHalftime });
+  const isFinal = game.status === 'final';
+  let elapsed = elapsedGameMinutes(period, clock, league, { isHalftime });
+  let remaining = remainingScheduledMinutes(period, clock, league, { isHalftime });
+  let remainPeriod = remainingInPeriodMinutes(period, clock, league, { isHalftime });
+  if (isFinal) {
+    const otPeriods = Math.max(period - cfg.periods, 0);
+    elapsed = cfg.regulationMinutes + otPeriods * cfg.otMinutes;
+    remaining = 0;
+    remainPeriod = 0;
+  }
   const virtual = isVirtualGame(game);
 
   const homeBox = game.box?.home || null;
@@ -68,11 +75,11 @@ function buildSnapshot(game, league) {
   let observedPace;
   let observedPPP;
 
-  if (boxOk && gp != null && elapsed >= 1) {
+  if (boxOk && gp != null && (elapsed >= 1 || isFinal)) {
     source = 'box';
-    observedPace = livePace(gp, elapsed, cfg.regulationMinutes);
+    observedPace = livePace(gp, Math.max(elapsed, 1), cfg.regulationMinutes);
     observedPPP = pointsPerPossession(totalScore, combined);
-  } else if (elapsed >= 1 && totalScore > 0) {
+  } else if ((elapsed >= 1 || isFinal) && totalScore > 0) {
     source = 'score_clock';
     const ptsPerReg = (totalScore / elapsed) * cfg.regulationMinutes;
     observedPPP = cfg.avgPPP;
@@ -104,8 +111,7 @@ function buildSnapshot(game, league) {
     ? (pace * remaining) / cfg.regulationMinutes * paceFactor
     : 0;
   const remainingPoints = remainingGamePoss * 2 * ppp;
-  let fairGameTotal = totalScore + remainingPoints;
-  if (game.status === 'final') fairGameTotal = totalScore;
+  const fairGameTotal = isFinal ? totalScore : totalScore + remainingPoints;
 
   const homeShareRaw = totalScore > 0 ? homeScore / totalScore : 0.5;
   const shareShrink = elapsed < 12 ? elapsed / 12 : 1;

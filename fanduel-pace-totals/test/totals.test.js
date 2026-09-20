@@ -114,6 +114,28 @@ describe('fair total + edge', () => {
     assert.ok(snap.ppp > LEAGUES.nba.clock.avgPPP);
   });
 
+  it('HIGH confidence on a complete box after 24 NBA minutes', () => {
+    const out = evaluate(liveNba(), LEAGUES.nba, { gameTotal: 220 });
+    assert.equal(out.confidence, 'HIGH');
+  });
+
+  it('final games use the actual score as fair total', () => {
+    const g = liveNba({
+      status: 'final',
+      period: 4,
+      clock: '0:00',
+      home: { abbrev: 'TOR', score: 110, qScores: [28, 26, 30, 26] },
+      away: { abbrev: 'MIA', score: 102, qScores: [24, 28, 22, 28] },
+    });
+    const snap = buildSnapshot(g, LEAGUES.nba);
+    assert.equal(snap.fairGameTotal, 212);
+    assert.equal(snap.remaining, 0);
+    assert.equal(snap.source, 'box');
+    const out = evaluate(g, LEAGUES.nba, { gameTotal: 220 });
+    assert.equal(out.markets[0].call, 'Under');
+    assert.equal(out.markets[0].fair, 212);
+  });
+
   it('team totals split remaining points with share shrink', () => {
     const snap = buildSnapshot(liveNba(), LEAGUES.nba);
     const out = evaluate(liveNba(), LEAGUES.nba, {

@@ -76,12 +76,13 @@ function risksText(snapshot, league, flags) {
 function evaluate(game, league, lines = {}) {
   const snapshot = buildSnapshot(game, league);
   const conf = confidence(snapshot, league, {
-    endOfPeriod: snapshot.remainPeriod < 0.4,
+    endOfPeriod: snapshot.remainPeriod < 0.4 && snapshot.remaining > 0.5,
   });
   const virtual = snapshot.virtual || isVirtualGame(game);
   const garbage = garbageTime(snapshot, league);
   const fouls = foulUpRisk(snapshot);
-  const forcePass = virtual || garbage || snapshot.inOt;
+  const settled = game.status === 'final';
+  const forcePass = virtual || (!settled && (garbage || snapshot.inOt));
 
   const gameLine = parseLine(lines.gameTotal);
   const qLine = parseLine(lines.quarterTotal);
@@ -91,7 +92,7 @@ function evaluate(game, league, lines = {}) {
 
   const flags = { virtual, garbage, fouls, ot: snapshot.inOt };
 
-  const gameCall = callFor(snapshot.fairGameTotal, gameLine, { conf, forcePass });
+  const gameCall = callFor(snapshot.fairGameTotal, gameLine, { conf, forcePass, settled });
   const markets = [];
 
   markets.push({

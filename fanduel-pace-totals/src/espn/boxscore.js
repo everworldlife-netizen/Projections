@@ -90,6 +90,20 @@ async function getBoxscore(leagueId, eventId) {
         ? 'scheduled'
         : 'in_progress';
 
+  let period = statusObj.period || 0;
+  let clock = statusObj.displayClock || '0:00';
+  if (mappedStatus === 'final') {
+    const qs = Math.max(home?.qScores?.length || 0, away?.qScores?.length || 0);
+    period = Math.max(period, qs, league.clock.periods);
+    clock = '0:00';
+  }
+  if (mappedStatus === 'halftime' && !period) period = Math.ceil(league.clock.periods / 2);
+
+  const homeBox = pickBox(statsMap, home);
+  const awayBox = pickBox(statsMap, away);
+  if (homeBox && !homeBox.pts) homeBox.pts = home?.score || 0;
+  if (awayBox && !awayBox.pts) awayBox.pts = away?.score || 0;
+
   return {
     id: `espn:${leagueId}:${eventId}`,
     sourceId: String(eventId),
@@ -101,15 +115,15 @@ async function getBoxscore(leagueId, eventId) {
     shortName: `${away?.abbrev} @ ${home?.abbrev}`,
     status: mappedStatus,
     statusDetail: statusObj.type?.shortDetail || statusObj.type?.detail || '',
-    period: statusObj.period || 0,
-    clock: statusObj.displayClock || '0:00',
+    period,
+    clock,
     isHalftime: mappedStatus === 'halftime',
     date: raw.header?.competitions?.[0]?.date || raw.header?.season?.year,
     home,
     away,
     box: {
-      home: pickBox(statsMap, home),
-      away: pickBox(statsMap, away),
+      home: homeBox,
+      away: awayBox,
     },
   };
 }

@@ -15,7 +15,7 @@ const FILTERS = [
 
 let games = [];
 let selectedId = null;
-let filter = 'live';
+let filter = 'all';
 let detail = null;
 let pollTimer = null;
 
