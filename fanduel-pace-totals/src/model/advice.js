@@ -61,7 +61,9 @@ function risksText(snapshot, league, flags) {
   if (snapshot.inOt) risks.push('Already in OT; totals include extra period variance');
   if (garbageTime(snapshot, league)) risks.push('Garbage time — benches / clock milking');
   if (foulUpRisk(snapshot)) risks.push('Foul-up / bonus free throws in last 2 min');
-  if (snapshot.remainPeriod < 0.5 && snapshot.period > 0) risks.push('End-of-period heaves');
+  if (snapshot.remainPeriod < 0.5 && snapshot.period > 0 && snapshot.remaining > 0.5) {
+    risks.push('End-of-period heaves');
+  }
   if (snapshot.source !== 'box') risks.push('Missing FGA/FTA/ORB/TO — LOW confidence');
   if (snapshot.elapsed < (league.clock.lowElapsed || 8)) risks.push('Tiny sample; shrinkage toward league PPP');
   if (!risks.length) risks.push('Normal variance; not a lock');
